@@ -4,7 +4,7 @@ import express from "express";
 import { config } from "dotenv";
 import { errors } from "celebrate";
 
-config({path: path.join(__dirname, "config", ".env")});
+//config({path: path.join(__dirname, "config", ".env")});
 import routes from "./routes";
 
 const app = express();
