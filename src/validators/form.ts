@@ -1,10 +1,12 @@
 import { celebrate, Joi, Segments } from "celebrate";
-import { ResponseQuestion } from "../interfaces/form";
 
 const validator = {
     calc: celebrate({
         [Segments.BODY]: Joi.object().keys({
-            questions: Joi.array().required()
+            questions: Joi.array().items(Joi.object().keys({
+                id: Joi.number().min(1).required(),
+                value: Joi.number().min(1).max(5).required()
+            })).required()
         })
     })
 };

@@ -2,7 +2,7 @@ import AppDataSource from "../data-source";
 import { Request, Response } from "express";
 import CustomResponse from "../utils/response";
 import { Question } from "../entity/Question";
-import { Trait } from "../entity/Trait";
+import { ResponseQuestion } from "../interfaces/form";
 
 export default class FormController {
 
@@ -29,12 +29,32 @@ export default class FormController {
             res.setStatus(400);
 
         } finally {
-            AppDataSource.destroy();
+            await AppDataSource.destroy();
             return response.json(res.getJSON());
         }
     }
 
-    static async process(request: Request, response: Response) {}
+    static async calc(request: Request, response: Response) {
+        const questions = request.body.questions as Array<ResponseQuestion>;
+        const res = new CustomResponse();
+
+        try {
+            // Inicia a conexão
+            await AppDataSource.initialize();
+
+            // Verifica se o número mínimo de questões foi enviada
+            if(questions.length < 50)
+                throw new Error("O teste precisa de ao menos 50 questões respondidas");
+
+        } catch(error: any) {
+            res.setMessage(error.message);
+            res.setStatus(444);
+
+        } finally {
+            await AppDataSource.destroy();
+            return response.json(res.getJSON());
+        }
+    }
 
     static async saveMetadata() {}
 

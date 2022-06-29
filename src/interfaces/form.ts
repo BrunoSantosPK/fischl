@@ -1,5 +1,7 @@
 import { StatusCode } from "../utils/response";
 
+export type ResponseLikert = 1 | 2 | 3 | 4 | 5;
+
 export interface Questions {
     id: number;
     direction: string;
@@ -17,5 +19,5 @@ export interface GetQuestions {
 
 export interface ResponseQuestion {
     id: number;
-    value: 1 | 2 | 3 | 4 | 5
+    value: ResponseLikert;
 }

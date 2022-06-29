@@ -1,4 +1,4 @@
-export type StatusCode = 200 | 400 | 401;
+export type StatusCode = 200 | 400 | 401 | 444;
 
 export default class CustomResponse {
 
