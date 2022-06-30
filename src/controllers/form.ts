@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import CustomResponse from "../utils/response";
 import { Question } from "../entity/Question";
 import { ResponseQuestion } from "../interfaces/form";
+import { In } from "typeorm";
+import { Trait } from "../entity/Trait";
 
 export default class FormController {
 
@@ -45,6 +47,40 @@ export default class FormController {
             // Verifica se o número mínimo de questões foi enviada
             if(questions.length < 50)
                 throw new Error("O teste precisa de ao menos 50 questões respondidas");
+
+            // Verifica se as questões informadas estão cadastradas no banco
+            const ids: Array<number> = [];
+            questions.forEach(item => ids.push(item.id));
+            const dataQuestions = await AppDataSource.manager.find(Question, {
+                where: { Id: In(ids) },
+                relations: { TraitId: true }
+            });
+
+            if(dataQuestions.length < 50)
+                throw new Error("Foram informadas questões não existentes no banco de dados");
+
+            // Faz o cálculo do big-5
+            const result: Array<{trait: string, composition: number}> = [];
+            const traits = await AppDataSource.manager.find(Trait);
+            traits.forEach(item => {
+                let sum = 0, total = 0;
+                for(let i = 0; i < dataQuestions.length; i++) {
+                    if(dataQuestions[i].TraitId.Id == item.Id) {
+                        total += 5;
+                        let find = questions.find(element => element.id == dataQuestions[i].Id);
+                        if(find) {
+                            sum += (dataQuestions[i].Direction == "Positive") ? find.value : 6 - find.value
+                        }
+                    }
+                }
+                result.push({
+                    trait: item.TranslateName,
+                    composition: sum / total
+                });
+            });
+
+            // Prepara as respostas para envio
+            res.setAttr("result", result);
 
         } catch(error: any) {
             res.setMessage(error.message);
