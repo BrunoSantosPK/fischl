@@ -1,10 +1,11 @@
+import { In } from "typeorm";
+import { Log } from "../entity/Log";
+import { Trait } from "../entity/Trait";
 import AppDataSource from "../data-source";
 import { Request, Response } from "express";
-import CustomResponse from "../utils/response";
 import { Question } from "../entity/Question";
+import CustomResponse from "../utils/response";
 import { ResponseQuestion } from "../interfaces/form";
-import { In } from "typeorm";
-import { Trait } from "../entity/Trait";
 
 export default class FormController {
 
@@ -79,8 +80,18 @@ export default class FormController {
                 });
             });
 
+            // Registra dados de acesso
+            const insert = await AppDataSource.manager.getRepository(Log).insert({
+                IP: request.body?.ip,
+                Latitude: request.body?.lat,
+                Longitude: request.body?.long,
+                Response: JSON.stringify(questions),
+                Browser: request.headers["user-agent"]
+            });
+
             // Prepara as respostas para envio
             res.setAttr("result", result);
+            res.setAttr("idTemp", insert.generatedMaps[0].Id)
 
         } catch(error: any) {
             res.setMessage(error.message);
@@ -91,7 +102,5 @@ export default class FormController {
             return response.json(res.getJSON());
         }
     }
-
-    static async saveMetadata() {}
 
 }
