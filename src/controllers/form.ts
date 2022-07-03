@@ -85,12 +85,14 @@ export default class FormController {
                 IP: request.body?.ip,
                 Latitude: request.body?.lat,
                 Longitude: request.body?.long,
+                Duration: request.body?.duration,
                 Response: JSON.stringify(questions),
                 Browser: request.headers["user-agent"]
             });
 
             // Prepara as respostas para envio
             res.setAttr("result", result);
+            res.setAttr("perfil", "istj");
             res.setAttr("idTemp", insert.generatedMaps[0].Id)
 
         } catch(error: any) {

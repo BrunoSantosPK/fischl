@@ -21,4 +21,7 @@ export class Log {
     @Column({type: "float", name: "Longitude", default: null})
     Longitude: number;
 
+    @Column({type: "int", name: "Duration"})
+    Duration: number;
+
 }

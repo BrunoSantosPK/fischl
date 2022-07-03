@@ -5,6 +5,7 @@ import AppDataSource from "../data-source";
 import { Questions } from "../interfaces/form";
 
 let idTemp: number;
+const duration = 100;
 const likert: any[] = [];
 const ip = "189.26.103.5";
 
@@ -57,7 +58,7 @@ describe("Sistema de gestão de formulário likert para Big-5", () => {
                 if(i == 40) data.push({ value: likert[i].value });
                 else data.push({...likert[i]})
             }
-            let result = await request(app).post("/form").send({ questions: data });
+            let result = await request(app).post("/form").send({ questions: data, duration });
             expect(result.body).toEqual(expect.objectContaining({
                 statusCode: 400,
                 message: `\"questions[40].id\" is required`
@@ -69,7 +70,7 @@ describe("Sistema de gestão de formulário likert para Big-5", () => {
                 if(i == 40) data.push({ id: likert[i].id });
                 else data.push({...likert[i]})
             }
-            result = await request(app).post("/form").send({ questions: data });
+            result = await request(app).post("/form").send({ questions: data, duration });
             expect(result.body).toEqual(expect.objectContaining({
                 statusCode: 400,
                 message: `\"questions[40].value\" is required`
@@ -78,7 +79,7 @@ describe("Sistema de gestão de formulário likert para Big-5", () => {
 
         it("Falha - array de respostas com número de questões diferente de 50", async() => {
             const data = likert.slice(0, 49);
-            const result = await request(app).post("/form").send({ questions: data });
+            const result = await request(app).post("/form").send({ questions: data, duration });
             expect(result.body).toEqual(expect.objectContaining({
                 statusCode: 444,
                 message: "O teste precisa de ao menos 50 questões respondidas"
@@ -91,7 +92,7 @@ describe("Sistema de gestão de formulário likert para Big-5", () => {
                 if(i == 40) data.push({ id: 100, value: item.value });
                 else data.push(item)
             });
-            const result = await request(app).post("/form").send({ questions: data });
+            const result = await request(app).post("/form").send({ questions: data, duration });
             expect(result.body).toEqual(expect.objectContaining({
                 statusCode: 444,
                 message: "Foram informadas questões não existentes no banco de dados"
@@ -99,10 +100,11 @@ describe("Sistema de gestão de formulário likert para Big-5", () => {
         });
 
         it("Sucesso - cálculo big-5 efetuado e resposta enviada para o usuário", async() => {
-            const result = await request(app).post("/form").send({ questions: likert, ip });
+            const result = await request(app).post("/form").send({ questions: likert, ip, duration });
             idTemp = result.body.data.idTemp;
             expect(result.body.message).toBe("");
             expect(result.body.statusCode).toBe(200);
+            expect(result.body.data.perfil).toBe("istj");
             expect(result.body.data.result.length).toBe(5);
             expect(result.body.data.idTemp).toBeGreaterThan(0);
         });
