@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Question } from "./Question";
+import { TraitDescription } from "./TraitDescription";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 
 @Entity({ name: "Traits" })
 export class Trait {
@@ -15,5 +16,8 @@ export class Trait {
 
     @OneToMany(() => Question, question => question.TraitId)
     Questions: Question[];
+
+    @OneToMany(() => TraitDescription, description => description.TraitId)
+    TraitDescriptions: TraitDescription[];
 
 }

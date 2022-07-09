@@ -1,9 +1,12 @@
 import path from "path";
 import { config } from "dotenv";
+import { Log } from "./entity/Log";
 import { DataSource } from "typeorm";
 import { Trait } from "./entity/Trait";
 import { Question } from "./entity/Question";
-import { Log } from "./entity/Log";
+import { Personality } from "./entity/Personality";
+import { TraitDescription } from "./entity/TraitDescription";
+
 config({ path: path.join(__dirname, "config", ".env") });
 
 const AppDataSource = new DataSource({
@@ -14,7 +17,7 @@ const AppDataSource = new DataSource({
     password: process.env.MYSQL_PASS,
     database: process.env.MYSQL_DB,
     synchronize: true,
-    entities: [Trait, Question, Log]
+    entities: [Trait, Question, Log, TraitDescription, Personality]
 });
 
 export default AppDataSource;
