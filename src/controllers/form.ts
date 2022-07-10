@@ -5,7 +5,9 @@ import AppDataSource from "../data-source";
 import { Request, Response } from "express";
 import { Question } from "../entity/Question";
 import CustomResponse from "../utils/response";
-import { ResponseQuestion } from "../interfaces/form";
+import { ResponseQuestion, ResultCalcTrait } from "../interfaces/form";
+import { TraitDescription, TraitLevel } from "../entity/TraitDescription";
+import { MBTI, Personality } from "../entity/Personality";
 
 export default class FormController {
 
@@ -60,10 +62,13 @@ export default class FormController {
             if(dataQuestions.length < 50)
                 throw new Error("Foram informadas questões não existentes no banco de dados");
 
-            // Faz o cálculo do big-5
-            const result: Array<{trait: string, composition: number}> = [];
+            // Faz o cálculo do big-5, recuperando traços e descrições
+            const descriptions = await AppDataSource.manager.find(TraitDescription, {relations: {TraitId: true }});
             const traits = await AppDataSource.manager.find(Trait);
+            const result: Array<ResultCalcTrait> = [];
+            
             traits.forEach(item => {
+                // Recupera os valores respondidos 
                 let sum = 0, total = 0;
                 for(let i = 0; i < dataQuestions.length; i++) {
                     if(dataQuestions[i].TraitId.Id == item.Id) {
@@ -74,9 +79,21 @@ export default class FormController {
                         }
                     }
                 }
+
+                // Define se o traço está alto ou baixo
+                let composition = sum / total;
+                let level: TraitLevel = (composition < 0.5) ? "Low" : "High";
+                let description = descriptions.find(element => {
+                    return element.TraitId.Id == item.Id && element.TraitLevel == level
+                });
+
                 result.push({
+                    traitId: item.Id,
+                    traitLevel: level,
+                    score: sum / total,
                     trait: item.TranslateName,
-                    composition: sum / total
+                    traitSymbol: description?.Symbol,
+                    description: description?.Description,
                 });
             });
 
@@ -90,10 +107,30 @@ export default class FormController {
                 Browser: request.headers["user-agent"]
             });
 
+            // Faz a composição do tipo de personalidade
+            let name = "";
+            [1, 3, 2, 5].forEach(id => {
+                for(let i = 0; i < result.length; i++) {
+                    if(result[i].traitId == id) {
+                        name += result[i].traitSymbol;
+                        break;
+                    }
+                }
+            });
+
+            const detail = await AppDataSource.manager.findOne(Personality, {
+                where: { Symbol: name as MBTI }
+            });
+
             // Prepara as respostas para envio
             res.setAttr("result", result);
-            res.setAttr("perfil", "istj");
-            res.setAttr("idTemp", insert.generatedMaps[0].Id)
+            res.setAttr("idTemp", insert.generatedMaps[0].Id);
+            res.setAttr("personality", {
+                name: detail?.Name,
+                tag: detail?.Symbol,
+                description: detail?.Description
+            });
+            
 
         } catch(error: any) {
             res.setMessage(error.message);

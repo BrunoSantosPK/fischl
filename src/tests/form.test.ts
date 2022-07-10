@@ -1,3 +1,5 @@
+import XLSX from "xlsx";
+import path from "path";
 import app from "../app";
 import request from "supertest";
 import { Log } from "../entity/Log";
@@ -6,19 +8,14 @@ import { Questions } from "../interfaces/form";
 
 let idTemp: number;
 const duration = 100;
-const likert: any[] = [];
+let likert: any[] = [];
 const ip = "189.26.103.5";
-
-/*
-Possível escala de teste: [{"id":1,"value":1},{"id":2,"value":5},{"id":3,"value":4},{"id":4,"value":2},{"id":5,"value":3},{"id":6,"value":2},{"id":7,"value":2},{"id":8,"value":2},{"id":9,"value":3},{"id":10,"value":3},{"id":11,"value":1},{"id":12,"value":5},{"id":13,"value":1},{"id":14,"value":1},{"id":15,"value":2},{"id":16,"value":2},{"id":17,"value":3},{"id":18,"value":2},{"id":19,"value":2},{"id":20,"value":5},{"id":21,"value":3},{"id":22,"value":4},{"id":23,"value":5},{"id":24,"value":1},{"id":25,"value":1},{"id":26,"value":4},{"id":27,"value":3},{"id":28,"value":3},{"id":29,"value":2},{"id":30,"value":1},{"id":31,"value":2},{"id":32,"value":3},{"id":33,"value":3},{"id":34,"value":1},{"id":35,"value":2},{"id":36,"value":1},{"id":37,"value":4},{"id":38,"value":1},{"id":39,"value":2},{"id":40,"value":4},{"id":41,"value":5},{"id":42,"value":3},{"id":43,"value":3},{"id":44,"value":5},{"id":45,"value":4},{"id":46,"value":1},{"id":47,"value":5},{"id":48,"value":3},{"id":49,"value":5},{"id":50,"value":2}]
-*/
 
 describe("Sistema de gestão de formulário likert para Big-5", () => {
     beforeAll(async() => {
-        // Cria a escala padrão utilizada no teste
-        for(let i = 1; i <= 50; i++) {
-            likert.push({ id: i, value: Math.floor(Math.random() * 5) + 1 })
-        }
+        // Faz a leitura do arquivo com dados de teste
+        const file = XLSX.readFile(path.join(__dirname, "data.xlsx"));
+        likert = XLSX.utils.sheet_to_json(file.Sheets["Response"]);
     });
 
     afterAll(async() => {
@@ -104,7 +101,7 @@ describe("Sistema de gestão de formulário likert para Big-5", () => {
             idTemp = result.body.data.idTemp;
             expect(result.body.message).toBe("");
             expect(result.body.statusCode).toBe(200);
-            expect(result.body.data.perfil).toBe("istj");
+            expect(result.body.data.personality.tag).toBe("ISFP");
             expect(result.body.data.result.length).toBe(5);
             expect(result.body.data.idTemp).toBeGreaterThan(0);
         });
