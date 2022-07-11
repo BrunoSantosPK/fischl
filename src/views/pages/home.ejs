@@ -3,15 +3,82 @@
 
     <head>
         <%- include("../layouts/head"); %>
-        <title>Matriz de personalidade</title>
+        <title>Matriz de Personalidade</title>
     </head>
 
     <body>
         <%- include("../layouts/header"); %>
 
         <div class="container page">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse a turpis tortor. In sed nulla porta, sollicitudin leo et, tempor ante. Vestibulum aliquet molestie pellentesque. Nam vel libero congue, auctor metus sed, convallis diam. Nunc posuere turpis eu odio fringilla venenatis. Donec ac lacinia mi. Morbi malesuada facilisis ex, ac vulputate libero commodo sed. Aliquam eget magna eleifend, lobortis velit ac, imperdiet sapien. Fusce at enim quis neque vulputate congue.</p>
+
+            <div class="row hide" id="detail">
+                <div class="col-12">
+                    <h1>Sua Matriz de Personalidade</h1>
+                    <h2>Entenda o seu perfil comportamental com suas fortalezas e fraquezas</h2>
+
+                    <p>Bem-vinda(o),<br>aqui na Matriz você pode fazer um teste para avaliação do seu perfil. Trabalhamos com o teste mais validado dos artigos de psicometria, o Big-5. Com um único teste, você receberá uma avaliação comportamental e seu MBTI. É super rápido e gratuito, topa? Só clicar no botão abaixo e começar a responder.</p>
+                </div>
+            </div>
+
+            <div class="row" id="questionnaire">
+                <div class="row">
+                    <div class="col-lg-4">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consectetur, ante nec pretium congue, libero dolor tempus dui, sit amet.</div>
+                    <div class="col-lg-8 area-likert">
+                        <div class="button-likert">Discordo totalmente</div>
+                        <div class="button-likert">Discordo parcialmente</div>
+                        <div class="button-likert">Nem discordo e nem concordo</div>
+                        <div class="button-likert">Concordo parcialmente</div>
+                        <div class="button-likert">Concordo totalmente</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="button-home" onclick="next()">
+                        COMEÇAR
+                    </div>
+                </div>
+            </div>
         </div>
+
     </body>
+
+    <script>
+
+        init();
+        async function init() {
+            try {
+                // Carrega questões likert para formulário Big-5
+                const req = await fetch("/form");
+                const res = await req.json();
+
+            } catch(error) {
+                console.log(error);
+            }
+            
+        }
+
+        // Máquina de estado
+        let state = "home";
+
+        function next() {
+            switch(state) {
+                case "home":
+                    state = "questionnaire-page-1";
+                    document.getElementById("detail").classList.add("hide");
+                    document.getElementById("questionnaire").classList.remove("hide");
+                    break
+
+                default:
+                    state = "home";
+                    document.getElementById("detail").classList.remove("hide");
+                    document.getElementById("questionnaire").classList.add("hide");
+                    break
+            }
+        }
+
+    </script>
 
 </html>
