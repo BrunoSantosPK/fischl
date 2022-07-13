@@ -25,9 +25,11 @@ body { font-family: 'Roboto', sans-serif; color: var(--primary-dark); font-weigh
     background-color: var(--primary-color); color: var(--primary-white); padding: 5px 20px;
     border-radius: 3px; font-size: 20px; cursor: pointer; transition: filter 0.3s;
 }
+.row-likert { margin-top: 20px; }
 .area-likert { display: flex; justify-content: space-between; }
-.area-likert div:hover { filter: brightness(90%); }
-.area-likert div {
+.area-likert .button-likert:hover { filter: brightness(90%); }
+.select-likert { filter: brightness(90%); }
+.area-likert .button-likert {
     background-color: var(--primary-gray); margin: 0px 5px; cursor: pointer; text-align: center;
     padding: 5px 10px; font-size: 15px; display: flex; justify-content: center; align-items: center;
     transition: filter 0.3s;
@@ -40,28 +42,31 @@ body { font-family: 'Roboto', sans-serif; color: var(--primary-dark); font-weigh
     .page h1 { font-size: 27px; }
     .page h2 { font-size: 20px; }
     .page p { font-size: 17px; }
+    
     .area-likert { flex-direction: column; }
-    .area-likert div { margin-top: 10px; }
+    .area-likert .button-likert { margin-top: 10px; }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
     .area-likert { flex-direction: column; }
-    .area-likert div { margin-top: 10px; }
+    .area-likert .button-likert { margin-top: 10px; }
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
     .area-likert { flex-direction: column; }
-    .area-likert div { margin-top: 10px; }
+    .area-likert .button-likert { margin-top: 10px; }
 }
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
     .area-likert { flex-direction: row; }
+    .area-likert .button-likert { margin-top: 0px; }
 }
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
     .area-likert { flex-direction: row; }
+    .area-likert .button-likert { margin-top: 0px; }
 }

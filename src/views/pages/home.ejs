@@ -20,7 +20,17 @@
                 </div>
             </div>
 
-            <div class="row" id="questionnaire">
+            <div class="row" id="question-group-1"></div>
+
+            <div class="row hide" id="question-group-2"></div>
+
+            <div class="row hide" id="question-group-3"></div>
+
+            <div class="row hide" id="question-group-4"></div>
+
+            <div class="row hide" id="question-group-5"></div>
+
+            <!--<div class="row" id="questionnaire">
                 <div class="row">
                     <div class="col-lg-4">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consectetur, ante nec pretium congue, libero dolor tempus dui, sit amet.</div>
@@ -32,7 +42,7 @@
                         <div class="button-likert">Concordo totalmente</div>
                     </div>
                 </div>
-            </div>
+            </div>-->
 
             <div class="row">
                 <div class="col-12">
@@ -47,6 +57,10 @@
 
     <script>
 
+        // Máquina de estado
+        let state = "home";
+        const questions = [];
+
         init();
         async function init() {
             try {
@@ -54,14 +68,129 @@
                 const req = await fetch("/form");
                 const res = await req.json();
 
+                if(res.statusCode != 200)
+                    throw new Error("Erro na requisição");
+
+                res.data.questions.forEach(item => {
+                    questions.push({
+                        text: item.Text,
+                        direction: item.Direction,
+                        id: item.Id,
+                        value: 0
+                    });
+                });
+                createQuestions();
+
             } catch(error) {
                 console.log(error);
             }
             
         }
 
-        // Máquina de estado
-        let state = "home";
+        function createQuestions() {
+            for(let j = 1; j <= 5; j++) {
+                // Recupera o elemento para alocação da bateria de perguntas
+                let group = document.getElementById(`question-group-${j}`);
+                let init = (j - 1) * 10;
+                let finish = j * 10;
+
+                for(let i = init; i < finish; i++) {
+                    // Cadastra as divs de utilização
+                    let row = document.createElement("div");
+                    let col1 = document.createElement("div");
+                    let col2 = document.createElement("div");
+
+                    row.classList.add("row");
+                    row.classList.add("row-likert");
+
+                    col1.classList.add("col-lg-4");
+                    col1.innerHTML = questions[i].text;
+
+                    col2.classList.add("col-lg-8");
+                    col2.classList.add("area-likert");
+
+                    // Cria as caixas de seleção likert
+                    const buttons = [];
+                    [
+                        "Discordo totalmente",
+                        "Discordo parcialmente",
+                        "Nem concordo e nem discordo",
+                        "Concordo parcialmente",
+                        "Concordo totalmente"
+                    ].forEach((tag, i) => {
+                        let button = document.createElement("div");
+                        button.classList.add("button-likert");
+                        button.innerHTML = tag;
+                        buttons.push(button);
+                        col2.appendChild(button);
+                    });
+
+                    // Cadastra o evento de click
+                    const callback = (index) => {
+                        buttons.forEach((node, i) => {
+                            node.classList.remove("select-likert");
+                            if(i == index) {
+                                node.classList.add("select-likert");
+                                questions[i].value = i + 1;
+                            }
+                        });
+                    };
+                    buttons.forEach((node, i) => node.addEventListener("click", () => callback(i)));
+
+                    // Finaliza as alocações de elementos na row
+                    row.appendChild(col1);
+                    row.appendChild(col2);
+                    group.appendChild(row);
+                }
+            }
+
+
+
+
+            /*const q1 = document.getElementById("questionnaire");
+            for(let i = 0; i < 10; i++) {
+                let row = document.createElement("div");
+                let col1 = document.createElement("div");
+                let col2 = document.createElement("div");
+
+                row.classList.add("row");
+                row.classList.add("row-likert");
+                col1.classList.add("col-lg-4");
+                col2.classList.add("col-lg-8");
+                col2.classList.add("area-likert");
+
+                col1.innerHTML = questions[i].text;
+                const buttons = [];
+                [
+                    "Discordo totalmente",
+                    "Discordo parcialmente",
+                    "Nem concordo e nem discordo",
+                    "Concordo parcialmente",
+                    "Concordo totalmente"
+                ].forEach((tag, i) => {
+                    let button = document.createElement("div");
+                    button.classList.add("button-likert");
+                    button.innerHTML = tag;
+                    buttons.push(button);
+                    col2.appendChild(button);
+                });
+
+                const callback = (index) => {
+                    buttons.forEach((node, i) => {
+                        node.classList.remove("select-likert");
+                        if(i == index) {
+                            node.classList.add("select-likert");
+                            questions[i].value = i + 1;
+                        }
+                    });
+                };
+                buttons.forEach((node, i) => node.addEventListener("click", () => callback(i)));
+
+                row.appendChild(col1);
+                row.appendChild(col2);
+                q1.appendChild(row);
+            }*/
+        }
 
         function next() {
             switch(state) {
