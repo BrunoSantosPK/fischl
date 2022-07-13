@@ -11,7 +11,7 @@
 
         <div class="container page">
 
-            <div class="row hide" id="detail">
+            <div class="row" id="detail">
                 <div class="col-12">
                     <h1>Sua Matriz de Personalidade</h1>
                     <h2>Entenda o seu perfil comportamental com suas fortalezas e fraquezas</h2>
@@ -20,7 +20,7 @@
                 </div>
             </div>
 
-            <div class="row" id="question-group-1"></div>
+            <div class="row hide" id="question-group-1"></div>
 
             <div class="row hide" id="question-group-2"></div>
 
@@ -29,20 +29,6 @@
             <div class="row hide" id="question-group-4"></div>
 
             <div class="row hide" id="question-group-5"></div>
-
-            <!--<div class="row" id="questionnaire">
-                <div class="row">
-                    <div class="col-lg-4">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consectetur, ante nec pretium congue, libero dolor tempus dui, sit amet.</div>
-                    <div class="col-lg-8 area-likert">
-                        <div class="button-likert">Discordo totalmente</div>
-                        <div class="button-likert">Discordo parcialmente</div>
-                        <div class="button-likert">Nem discordo e nem concordo</div>
-                        <div class="button-likert">Concordo parcialmente</div>
-                        <div class="button-likert">Concordo totalmente</div>
-                    </div>
-                </div>
-            </div>-->
 
             <div class="row">
                 <div class="col-12">
@@ -58,15 +44,20 @@
     <script>
 
         // Máquina de estado
-        let state = "home";
         const questions = [];
+        const state = {
+            ip: "",
+            mode: "home",
+            currentPage: "detail",
+            startTime: 0,
+            pages: ["detail", "question-group-1", "question-group-2", "question-group-3", "question-group-4", "question-group-5"]
+        };
 
-        init();
         async function init() {
             try {
                 // Carrega questões likert para formulário Big-5
-                const req = await fetch("/form");
-                const res = await req.json();
+                let req = await fetch("/form");
+                let res = await req.json();
 
                 if(res.statusCode != 200)
                     throw new Error("Erro na requisição");
@@ -81,18 +72,28 @@
                 });
                 createQuestions();
 
+                // Recupera IP do usuário
+                req = await fetch("https://api.ipify.org/?format=json");
+                res = await req.json();
+                state.ip = res.ip;
+
             } catch(error) {
                 console.log(error);
             }
             
         }
 
+        function getLimitsQuestions(part) {
+            const init = (part - 1) * 10;
+            const finish = part * 10;
+            return { init, finish };
+        }
+
         function createQuestions() {
             for(let j = 1; j <= 5; j++) {
                 // Recupera o elemento para alocação da bateria de perguntas
                 let group = document.getElementById(`question-group-${j}`);
-                let init = (j - 1) * 10;
-                let finish = j * 10;
+                let { init, finish } = getLimitsQuestions(j);
 
                 for(let i = init; i < finish; i++) {
                     // Cadastra as divs de utilização
@@ -127,11 +128,11 @@
 
                     // Cadastra o evento de click
                     const callback = (index) => {
-                        buttons.forEach((node, i) => {
+                        buttons.forEach((node, j) => {
                             node.classList.remove("select-likert");
-                            if(i == index) {
+                            if(j == index) {
                                 node.classList.add("select-likert");
-                                questions[i].value = i + 1;
+                                questions[i].value = j + 1;
                             }
                         });
                     };
@@ -143,70 +144,77 @@
                     group.appendChild(row);
                 }
             }
-
-
-
-
-            /*const q1 = document.getElementById("questionnaire");
-            for(let i = 0; i < 10; i++) {
-                let row = document.createElement("div");
-                let col1 = document.createElement("div");
-                let col2 = document.createElement("div");
-
-                row.classList.add("row");
-                row.classList.add("row-likert");
-                col1.classList.add("col-lg-4");
-                col2.classList.add("col-lg-8");
-                col2.classList.add("area-likert");
-
-                col1.innerHTML = questions[i].text;
-                const buttons = [];
-                [
-                    "Discordo totalmente",
-                    "Discordo parcialmente",
-                    "Nem concordo e nem discordo",
-                    "Concordo parcialmente",
-                    "Concordo totalmente"
-                ].forEach((tag, i) => {
-                    let button = document.createElement("div");
-                    button.classList.add("button-likert");
-                    button.innerHTML = tag;
-                    buttons.push(button);
-                    col2.appendChild(button);
-                });
-
-                const callback = (index) => {
-                    buttons.forEach((node, i) => {
-                        node.classList.remove("select-likert");
-                        if(i == index) {
-                            node.classList.add("select-likert");
-                            questions[i].value = i + 1;
-                        }
-                    });
-                };
-                buttons.forEach((node, i) => node.addEventListener("click", () => callback(i)));
-
-                row.appendChild(col1);
-                row.appendChild(col2);
-                q1.appendChild(row);
-            }*/
         }
 
         function next() {
-            switch(state) {
-                case "home":
-                    state = "questionnaire-page-1";
-                    document.getElementById("detail").classList.add("hide");
-                    document.getElementById("questionnaire").classList.remove("hide");
-                    break
+            // Define uma callback para ocultar todas as páginas
+            const render = (showPage) => {
+                state.pages.forEach(page => {
+                    let node = document.getElementById(page);
+                    node.classList.add("hide");
+                    if(page == showPage) {
+                        node.classList.remove("hide");
+                        state.currentPage = showPage;
+                    }
+                });
+            };
 
-                default:
-                    state = "home";
-                    document.getElementById("detail").classList.remove("hide");
-                    document.getElementById("questionnaire").classList.add("hide");
-                    break
+            // Define a verificação se a página atual possui pendências
+            const isOk = () => {
+                const parts = state.currentPage.split("-");
+                let valid = true;
+
+                if(parts.length == 3) {
+                    const { init, finish } = getLimitsQuestions(parseInt(parts[2]));
+                    for(let i = init; i < finish; i++) {
+                        if(questions[i].value == 0) {
+                            valid = false;
+                            break;
+                        }
+                    }
+                }
+                return valid;
+            };
+
+            // Verifica qual será a pŕoxima página a ser exibida
+            const index = state.pages.indexOf(state.currentPage);
+            const nextPage = (index == state.pages.length - 1) ? "result" : state.pages[index + 1];
+            if(index == 1) {
+                state.startTime = Date.now();
             }
+
+            if(nextPage == "result") {
+                submit();
+                return;
+            }
+
+            if(isOk())
+                render(nextPage);
+            else
+                alert("Existem questões não respondidas, por favor verifique antes de continuar.");
         }
+
+        async function submit() {
+            const data = [];
+            const duration = (Date.now() - state.startTime) / 1000;
+            questions.forEach(item => data.push({ value: item.value, id: item.id }));
+            const req = await fetch("/form", {
+                method: "POST",
+                body: JSON.stringify({
+                    questions: data,
+                    ip: state.ip,
+                    duration,
+                }),
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json"
+                }
+            });
+            const res = await req.json();
+            console.log(res);
+        }
+
+        init();
 
     </script>
 

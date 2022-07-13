@@ -28,11 +28,11 @@ body { font-family: 'Roboto', sans-serif; color: var(--primary-dark); font-weigh
 .row-likert { margin-top: 20px; }
 .area-likert { display: flex; justify-content: space-between; }
 .area-likert .button-likert:hover { filter: brightness(90%); }
-.select-likert { filter: brightness(90%); }
+.select-likert { background-color: var(--primary-dark) !important; color: var(--primary-white); }
 .area-likert .button-likert {
     background-color: var(--primary-gray); margin: 0px 5px; cursor: pointer; text-align: center;
     padding: 5px 10px; font-size: 15px; display: flex; justify-content: center; align-items: center;
-    transition: filter 0.3s;
+    transition: filter 0.3s; width: 20%;
 }
 
 /* Extra small devices (phones, 600px and down) */
