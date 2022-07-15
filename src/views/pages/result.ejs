@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+    <head>
+        <%- include("../layouts/head"); %>
+        <title><%= mbti %> - <%= name %></title>
+    </head>
+
+    <body>
+
+        <%- include("../layouts/header"); %>
+
+        <div class="container page">
+            <div class="row">
+                <div class="col-md-6">
+                    <% traits.forEach(item => { %>
+                        <div class="trait-box">
+                            <%= item.name %>
+                            <br>
+                            (<%= item.level %>)
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="col-md-6">
+                    <% traits.forEach(item => { %>
+                        <div class="trait-text" id="<%= item.name %>-<%= item.level %>">
+                            <p><%= item.description %></p>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <h1>Você possui o perfil <%= name %></h1>
+                    <% description.forEach(text => { %>
+                        <p><%= text %></p>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+    <script></script>
+
+</html>

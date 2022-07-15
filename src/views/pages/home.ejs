@@ -211,7 +211,10 @@
                 }
             });
             const res = await req.json();
-            console.log(res);
+            localStorage.setItem("testResult", JSON.stringify(res));
+            if(res.statusCode == 200) {
+                window.location.href = `/result/${res.data.personality.tag}`;
+            }
         }
 
         init();

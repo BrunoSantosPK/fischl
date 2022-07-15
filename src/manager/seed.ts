@@ -13,10 +13,10 @@ import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity
         await AppDataSource.initialize();
         const result = (await AppDataSource.createQueryBuilder().insert().into(Trait).values([
             { OriginName: "Extraversion", TranslateName: "Sociabilidade" },
-            { OriginName: "Agreeableness", TranslateName: "Humanidade" },
-            { OriginName: "Conscientiousness", TranslateName: "Lógica" },
+            { OriginName: "Agreeableness", TranslateName: "Amabilidade" },
+            { OriginName: "Conscientiousness", TranslateName: "Racionalidade" },
             { OriginName: "Emotional Stability", TranslateName: "Estabilidade Emocional" },
-            { OriginName: "Imagination", TranslateName: "Imaginação" }
+            { OriginName: "Imagination", TranslateName: "Criatividade" }
         ]).execute()).generatedMaps;
 
         // Carrega questões do arquivo
